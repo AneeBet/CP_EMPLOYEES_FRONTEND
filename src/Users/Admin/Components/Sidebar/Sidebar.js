@@ -13,7 +13,7 @@ const Sidebar = ({ activeItem, setActiveItem, handleLogout }) => {
   return (
     <aside className="sidebar">
       <div>
-        <h2>CREDITPULSE<i className="fa fa-user-circle" aria-hidden="true"></i></h2>
+        <h2>CREDITPULSE</h2>
         <ul>
           <li className={activeItem === 'Dashboard' ? 'active' : ''}>
             <button
