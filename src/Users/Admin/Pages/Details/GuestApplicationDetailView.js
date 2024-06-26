@@ -13,8 +13,8 @@ const GuestApplicationDetailView = () => {
     { label: 'PAN ID', key: 'panId' },
     { label: 'Mobile Number', key: 'mobileNumber' },
     { label: 'Current Employment Company', key: 'companyName' },
-    { label: 'Annual Income', key: 'annualIncome' },
-    { label: 'Card Type', key: 'creditCard' },
+    { label: 'Annual Income', key: 'annualIncome' }
+    
   ];
 
   const downloadFiles = [

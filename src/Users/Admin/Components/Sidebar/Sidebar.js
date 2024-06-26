@@ -13,7 +13,7 @@ const Sidebar = ({ activeItem, setActiveItem, handleLogout }) => {
   return (
     <aside className="sidebar">
       <div>
-        <h2>Dashboard <i className="fa fa-user-circle" aria-hidden="true"></i></h2>
+        <h2>CREDITPULSE<i className="fa fa-user-circle" aria-hidden="true"></i></h2>
         <ul>
           <li className={activeItem === 'Dashboard' ? 'active' : ''}>
             <button
@@ -30,7 +30,7 @@ const Sidebar = ({ activeItem, setActiveItem, handleLogout }) => {
               onClick={() => handleNavigation('All Pending Guest Applications', '/admin/pendingguestapplications')}
             >
               <i className="fa fa-user" aria-hidden="true"></i>
-              Pending Guest Applications
+              Guest Applications
             </button>
           </li>
           <li className={activeItem === 'All Pending Customer Applications' ? 'active' : ''}>
@@ -39,7 +39,7 @@ const Sidebar = ({ activeItem, setActiveItem, handleLogout }) => {
               onClick={() => handleNavigation('All Pending Customer Applications', '/admin/pendingcustomerapplications')}
             >
               <i className="fa fa-user" aria-hidden="true"></i>
-              Pending Customer Applications
+               Customer Applications
             </button>
           </li>
           <li className={activeItem === 'All Pending Customer Upgrade Applications' ? 'active' : ''}>
@@ -48,7 +48,7 @@ const Sidebar = ({ activeItem, setActiveItem, handleLogout }) => {
               onClick={() => handleNavigation('All Pending Customer Upgrade Applications', '/admin/pendingcustomerupgradeapplications')}
             >
               <i className="fa fa-user" aria-hidden="true"></i>
-              Pending Customer Upgradation Applications
+               Card Upgradation Applications
             </button>
           </li>
           <li className={activeItem === 'All Customers' ? 'active' : ''}>
