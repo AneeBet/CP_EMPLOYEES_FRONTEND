@@ -12,12 +12,7 @@ const CustomerCardUpgradeApplicationDetailView = () => {
     { label: 'Name', key: 'name' },
     { label: 'Email', key: 'email' },
     { label: 'Mobile Number', key: 'mobileNumber' },
-    { label: 'Aadhaar Number', key: 'aadhaarNumber' },
     { label: 'PAN ID', key: 'panId' },
-    { label: 'Address', key: 'address' },
-    { label: 'Date of Birth', key: 'dob', format: date => new Date(date).toLocaleDateString() },
-    { label: 'Employment Years', key: 'employmentYears' },
-    { label: 'Is Presently Employed', key: 'isPresentlyEmployed', format: value => value ? 'Yes' : 'No' },
     { label: 'Company Name', key: 'companyName' },
     { label: 'Annual Income', key: 'annualIncome' }
   ];

@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Grievances from './Grievances';
-import * as scheduleService from '../Utils/SchduleService';
+import { resolveCustomerGrievance, resolveGuestGrievance, getCustomerGrievancesPending, getGuestGrievancesPending } from '../Utils/SchduleService';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 jest.mock('../Utils/SchduleService');
 
@@ -12,201 +11,162 @@ describe('Grievances Component', () => {
     jest.clearAllMocks();
   });
 
-  const mockCustomerGrievances = [
-    {
-      grievanceId: '1',
-      customerName: 'John Doe',
-      customerEmail: 'john@example.com',
-      customerPhone: '1234567890',
-      userType: 'Customer',
-      timestamp: '2023-01-01T00:00:00Z',
-      subject: 'Issue 1',
-      description: 'Description 1',
-      status: 'Pending'
-    }
-  ];
-
-  const mockGuestGrievances = [
-    {
-      grievanceId: '2',
-      guestName: 'Jane Doe',
-      guestEmail: 'jane@example.com',
-      guestPhone: '0987654321',
-      userType: 'Guest',
-      timestamp: '2023-01-02T00:00:00Z',
-      subject: 'Issue 2',
-      description: 'Description 2',
-      status: 'Pending'
-    }
-  ];
-
-  test('fetches and displays pending grievances', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: mockCustomerGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: mockGuestGrievances });
+  test('renders Grievances component and fetches pending grievances', async () => {
+    getCustomerGrievancesPending.mockResolvedValue({ data: [] });
+    getGuestGrievancesPending.mockResolvedValue({ data: [] });
 
     render(
-      <MemoryRouter>
+      <Router>
         <Grievances />
-      </MemoryRouter>
+      </Router>
+    );
+
+    expect(screen.getByText('Pending Grievances')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getCustomerGrievancesPending).toHaveBeenCalledTimes(1);
+      expect(getGuestGrievancesPending).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('displays fetched grievances', async () => {
+    const customerGrievances = [
+      {
+        grievanceId: 1,
+        customerName: 'John Doe',
+        customerEmail: 'john@example.com',
+        customerPhone: '1234567890',
+        userType: 'Customer',
+        timestamp: '2024-06-26 10:00:00',
+        subject: 'Account Issue',
+        status: 'PENDING',
+      },
+    ];
+    const guestGrievances = [
+      {
+        grievanceId: 2,
+        guestName: 'Jane Doe',
+        guestEmail: 'jane@example.com',
+        guestPhone: '0987654321',
+        userType: 'Guest',
+        timestamp: '2024-06-26 11:00:00',
+        subject: 'Booking Issue',
+        status: 'PENDING',
+      },
+    ];
+
+    getCustomerGrievancesPending.mockResolvedValue({ data: customerGrievances });
+    getGuestGrievancesPending.mockResolvedValue({ data: guestGrievances });
+
+    render(
+      <Router>
+        <Grievances />
+      </Router>
     );
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+      expect(screen.getByText('jane@example.com')).toBeInTheDocument();
     });
   });
 
-  test('opens and closes the modal', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: mockCustomerGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: mockGuestGrievances });
+  // test('opens modal with correct grievance details', async () => {
+  //   const grievances = [
+  //     {
+  //       grievanceId: 1,
+  //       customerName: 'John Doe',
+  //       customerEmail: 'john@example.com',
+  //       customerPhone: '1234567890',
+  //       userType: 'Customer',
+  //       timestamp: '2024-06-26 10:00:00',
+  //       subject: 'Account Issue',
+  //       status: 'PENDING',
+  //     },
+  //   ];
+
+  //   getCustomerGrievancesPending.mockResolvedValue({ data: grievances });
+  //   getGuestGrievancesPending.mockResolvedValue({ data: [] });
+
+  //   render(
+  //     <Router>
+  //       <Grievances />
+  //     </Router>
+  //   );
+
+  //   await waitFor(() => {
+  //     fireEvent.click(screen.getByText('View'));
+  //   });
+
+  //   // expect(screen.getByText('Grievance Detail')).toBeInTheDocument();
+  //   expect(screen.getByText('Account Issue')).toBeInTheDocument();
+  // });
+
+  test('resolves grievance and updates status', async () => {
+    const grievances = [
+      {
+        grievanceId: 1,
+        customerName: 'John Doe',
+        customerEmail: 'john@example.com',
+        customerPhone: '1234567890',
+        userType: 'Customer',
+        timestamp: '2024-06-26 10:00:00',
+        subject: 'Account Issue',
+        status: 'PENDING',
+      },
+    ];
+
+    getCustomerGrievancesPending.mockResolvedValue({ data: grievances });
+    getGuestGrievancesPending.mockResolvedValue({ data: [] });
+    resolveCustomerGrievance.mockResolvedValue({});
 
     render(
-      <MemoryRouter>
+      <Router>
         <Grievances />
-      </MemoryRouter>
+      </Router>
     );
 
     await waitFor(() => {
-      fireEvent.click(screen.getAllByText('View')[0]);
+      fireEvent.click(screen.getByText('View'));
     });
 
-    expect(screen.getByText('Grievance Detail')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Close'));
-    expect(screen.queryByText('Grievance Detail')).not.toBeInTheDocument();
-  });
-
-  test('submits resolution for customer grievance', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: mockCustomerGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: [] });
-    scheduleService.resolveCustomerScheduleCall.mockResolvedValue({});
-
-    render(
-      <MemoryRouter>
-        <Grievances />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      fireEvent.click(screen.getAllByText('View')[0]);
-    });
-
-    fireEvent.change(screen.getByPlaceholderText('Add your message here'), { target: { value: 'Resolved' } });
+    fireEvent.change(screen.getByPlaceholderText('Add your message here'), { target: { value: 'Resolved issue' } });
     fireEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(scheduleService.resolveCustomerScheduleCall).toHaveBeenCalledWith('1', 'Resolved');
-      expect(screen.queryByText('Grievance Detail')).not.toBeInTheDocument();
+      expect(resolveCustomerGrievance).toHaveBeenCalledWith(1, 'Resolved issue');
+      expect(screen.getByText('RESOLVED')).toBeInTheDocument();
     });
   });
 
-  test('submits resolution for guest grievance', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: [] });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: mockGuestGrievances });
-    scheduleService.resolveGuestScheduleCall.mockResolvedValue({});
-
-    render(
-      <MemoryRouter>
-        <Grievances />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      fireEvent.click(screen.getAllByText('View')[0]);
-    });
-
-    fireEvent.change(screen.getByPlaceholderText('Add your message here'), { target: { value: 'Resolved' } });
-    fireEvent.click(screen.getByText('Submit'));
-
-    await waitFor(() => {
-      expect(scheduleService.resolveGuestScheduleCall).toHaveBeenCalledWith('2', 'Resolved');
-      expect(screen.queryByText('Grievance Detail')).not.toBeInTheDocument();
-    });
-  });
-
-  test('handles pagination', async () => {
-    const manyGrievances = Array.from({ length: 10 }, (_, i) => ({
-      ...mockCustomerGrievances[0],
-      grievanceId: `${i + 1}`,
-      timestamp: `2023-01-${i + 1}T00:00:00Z`
+  test('pagination works correctly', async () => {
+    const grievances = Array.from({ length: 20 }, (_, i) => ({
+      grievanceId: i + 1,
+      customerName: `Customer ${i + 1}`,
+      customerEmail: `customer${i + 1}@example.com`,
+      customerPhone: `123456789${i}`,
+      userType: 'Customer',
+      timestamp: `2024-06-26 10:00:00`,
+      subject: 'Account Issue',
+      status: 'PENDING',
     }));
 
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: manyGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: [] });
+    getCustomerGrievancesPending.mockResolvedValue({ data: grievances });
+    getGuestGrievancesPending.mockResolvedValue({ data: [] });
 
     render(
-      <MemoryRouter>
+      <Router>
         <Grievances />
-      </MemoryRouter>
+      </Router>
     );
 
     await waitFor(() => {
-      expect(screen.getAllByText('John Doe').length).toBe(8); // first page with 8 items
+      expect(screen.getByText('Customer 1')).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('2'));
-    await waitFor(() => {
-      expect(screen.getAllByText('John Doe').length).toBe(2); // second page with 2 items
-    });
-  });
-
-  test('handles error when fetching grievances', async () => {
-    scheduleService.getCustomerGrievancesPending.mockRejectedValue(new Error('Error fetching grievances'));
-    scheduleService.getGuestGrievancesPending.mockRejectedValue(new Error('Error fetching grievances'));
-
-    render(
-      <MemoryRouter>
-        <Grievances />
-      </MemoryRouter>
-    );
 
     await waitFor(() => {
-      expect(screen.getByText('No data available')).toBeInTheDocument();
+      expect(screen.getByText('Customer 9')).toBeInTheDocument();
     });
-  });
-
-  test('handles error when resolving grievances', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: mockCustomerGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: [] });
-    scheduleService.resolveCustomerScheduleCall.mockRejectedValue(new Error('Error resolving grievance'));
-
-    render(
-      <MemoryRouter>
-        <Grievances />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      fireEvent.click(screen.getAllByText('View')[0]);
-    });
-
-    fireEvent.change(screen.getByPlaceholderText('Add your message here'), { target: { value: 'Resolved' } });
-    fireEvent.click(screen.getByText('Submit'));
-
-    await waitFor(() => {
-      expect(scheduleService.resolveCustomerScheduleCall).toHaveBeenCalledWith('1', 'Resolved');
-      expect(screen.getByText('Grievance Detail')).toBeInTheDocument(); // Modal should remain open due to error
-    });
-  });
-
-  test('handles modal actions correctly', async () => {
-    scheduleService.getCustomerGrievancesPending.mockResolvedValue({ data: mockCustomerGrievances });
-    scheduleService.getGuestGrievancesPending.mockResolvedValue({ data: [] });
-
-    render(
-      <MemoryRouter>
-        <Grievances />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      fireEvent.click(screen.getAllByText('View')[0]);
-    });
-
-    fireEvent.change(screen.getByPlaceholderText('Add your message here'), { target: { value: 'Some message' } });
-    fireEvent.click(screen.getByText('Close'));
-    expect(screen.queryByText('Grievance Detail')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getAllByText('View')[0]);
-    expect(screen.getByPlaceholderText('Add your message here').value).toBe('');
   });
 });

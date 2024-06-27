@@ -1,12 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import '../CSS/CSRDashboard.css';
 import { useNavigate } from 'react-router-dom';
 import CSRSidebar from '../Components/Sidebar/CSRSidebar';
-import { resolveCustomerScheduleCall, resolveGuestScheduleCall,getCustomerGrievancesPending , getGuestGrievancesPending} from '../Utils/SchduleService';
+import { resolveCustomerGrievance, resolveGuestGrievance, getCustomerGrievancesPending, getGuestGrievancesPending } from '../Utils/SchduleService';
 
-
-Modal.setAppElement('#root'); // Ensure the modal can be used with accessibility in mind
+Modal.setAppElement('#root'); 
 
 const Grievances = () => {
   const [grievances, setGrievances] = useState([]);
@@ -59,11 +59,18 @@ const Grievances = () => {
   const handleSubmit = async () => {
     try {
       if (modalContent.userType === 'Customer') {
-        await resolveCustomerScheduleCall(modalContent.grievanceId, message);
+        await resolveCustomerGrievance(modalContent.grievanceId, message);
       } else {
-        await resolveGuestScheduleCall(modalContent.grievanceId, message);
+        await resolveGuestGrievance(modalContent.grievanceId, message);
       }
-      setGrievances(prevGrievances => prevGrievances.filter(g => g.grievanceId !== modalContent.grievanceId));
+      
+      // Update the status of the grievance in the state
+      setGrievances(prevGrievances =>
+        prevGrievances.map(g => 
+          g.grievanceId === modalContent.grievanceId ? { ...g, status: 'RESOLVED' } : g
+        )
+      );
+
       closeModal();
     } catch (error) {
       console.error('Error resolving grievance', error);
